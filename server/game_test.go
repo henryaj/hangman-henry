@@ -13,7 +13,7 @@ var _ = Describe("Game", func() {
 	var game *Game
 
 	BeforeEach(func() {
-		game = NewGame("alabaster", 1)
+		game = NewGame("abc", 1)
 	})
 
 	Describe("Try", func() {
@@ -46,11 +46,42 @@ var _ = Describe("Game", func() {
 
 		When("there are no attempts remaining", func() {
 			It("returns an error", func() {
-				game.Try("z")
-				game.Try("q")
+				err := game.Try("q")
+				Expect(err).To(MatchError(fmt.Errorf("game over")))
 
-				Expect(game.Try("y")).To(MatchError(fmt.Errorf("game over")))
+				Expect(game.Try("y")).To(MatchError(fmt.Errorf("game already lost")))
 			})
 		})
+	})
+
+	Describe("InProgress", func() {
+		It("returns true when the game is in progress, false otherwise", func() {
+			Expect(game.InProgress()).To(BeTrue())
+
+			game.Try("q")
+			Expect(game.InProgress()).To(BeFalse())
+		})
+
+		Describe("Won", func() {
+			It("returns true when the game has been won, false otherwise", func() {
+				Expect(game.Won()).To(BeFalse())
+
+				game.Try("a")
+				game.Try("b")
+				game.Try("c")
+
+				Expect(game.Won()).To(BeTrue())
+			})
+		})
+
+		Describe("Lost", func() {
+			It("returns true when the game has been lost, false otherwise", func() {
+				Expect(game.Lost()).To(BeFalse())
+
+				game.Try("z")
+				Expect(game.Lost()).To(BeTrue())
+			})
+		})
+
 	})
 })
