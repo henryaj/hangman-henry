@@ -1,4 +1,4 @@
-package hangman_henry_test
+package game_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestHangmanHenry(t *testing.T) {
+func TestServer(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "HangmanHenry Suite")
+	RunSpecs(t, "Game Suite")
 }

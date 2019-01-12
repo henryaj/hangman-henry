@@ -1,4 +1,4 @@
-package server
+package game
 
 import (
 	"fmt"
@@ -7,17 +7,16 @@ import (
 
 // Game represents a single hangman game.
 type Game struct {
-	Word              string
-	AttemptsRemaining int
-	LettersAttempted  []string
-
-	gameState gameState
+	Word              string    `json:"word"`
+	AttemptsRemaining int       `json:"attempts_remaining"`
+	LettersAttempted  []string  `json:"letters_attempted"`
+	GameState         GameState `json:"game_state"`
 }
 
-type gameState int
+type GameState int
 
 const (
-	inProgress gameState = iota + 1
+	inProgress GameState = iota + 1
 	won
 	lost
 )
@@ -27,14 +26,14 @@ func NewGame(word string, attemptsRemaning int) *Game {
 	return &Game{
 		Word:              word,
 		AttemptsRemaining: attemptsRemaning,
-		gameState:         inProgress,
+		GameState:         inProgress,
 	}
 }
 
 // Try plays a letter in the current game, returning an error if that
 // letter has already been played.
 func (g *Game) Try(letter string) error {
-	if g.gameState == lost {
+	if g.GameState == lost {
 		return fmt.Errorf("game already lost")
 	}
 
@@ -51,12 +50,12 @@ func (g *Game) Try(letter string) error {
 	}
 
 	if g.AttemptsRemaining == 0 {
-		g.gameState = lost
+		g.GameState = lost
 		return fmt.Errorf("game over")
 	}
 
 	if sliceFullyContainsString(g.LettersAttempted, g.Word) {
-		g.gameState = won
+		g.GameState = won
 	}
 
 	return nil
@@ -64,17 +63,17 @@ func (g *Game) Try(letter string) error {
 
 // InProgress returns true if the game is in progress (has not been won or lost).
 func (g *Game) InProgress() bool {
-	return g.gameState == inProgress
+	return g.GameState == inProgress
 }
 
 // Won returns true if the game has been won.
 func (g *Game) Won() bool {
-	return g.gameState == won
+	return g.GameState == won
 }
 
 // Lost returns true if the game has been lost.
 func (g *Game) Lost() bool {
-	return g.gameState == lost
+	return g.GameState == lost
 }
 
 func sliceFullyContainsString(tried []string, target string) bool {

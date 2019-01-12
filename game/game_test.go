@@ -1,4 +1,4 @@
-package server_test
+package game_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/henryaj/hangman-henry/server"
+	. "github.com/henryaj/hangman-henry/game"
 )
 
 var _ = Describe("Game", func() {
@@ -61,27 +61,26 @@ var _ = Describe("Game", func() {
 			game.Try("q")
 			Expect(game.InProgress()).To(BeFalse())
 		})
+	})
 
-		Describe("Won", func() {
-			It("returns true when the game has been won, false otherwise", func() {
-				Expect(game.Won()).To(BeFalse())
+	Describe("Won", func() {
+		It("returns true when the game has been won, false otherwise", func() {
+			Expect(game.Won()).To(BeFalse())
 
-				game.Try("a")
-				game.Try("b")
-				game.Try("c")
+			game.Try("a")
+			game.Try("b")
+			game.Try("c")
 
-				Expect(game.Won()).To(BeTrue())
-			})
+			Expect(game.Won()).To(BeTrue())
 		})
+	})
 
-		Describe("Lost", func() {
-			It("returns true when the game has been lost, false otherwise", func() {
-				Expect(game.Lost()).To(BeFalse())
+	Describe("Lost", func() {
+		It("returns true when the game has been lost, false otherwise", func() {
+			Expect(game.Lost()).To(BeFalse())
 
-				game.Try("z")
-				Expect(game.Lost()).To(BeTrue())
-			})
+			game.Try("z")
+			Expect(game.Lost()).To(BeTrue())
 		})
-
 	})
 })
