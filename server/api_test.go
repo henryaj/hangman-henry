@@ -7,8 +7,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/henryaj/hangman-henry/server"
-
-	uuid "github.com/satori/go.uuid"
 )
 
 var _ = Describe("API", func() {
@@ -19,19 +17,18 @@ var _ = Describe("API", func() {
 	})
 
 	Describe("CreateNewGame", func() {
-		It("creates a new game and returns its ID", func() {
-			id := apiServer.CreateNewGame()
+		It("creates a new game and returns it", func() {
+			_, game := apiServer.CreateNewGame()
 
-			_, uuidParseErr := uuid.FromString(id)
-			Expect(uuidParseErr).NotTo(HaveOccurred())
+			Expect(string(game.GameState)).To(Equal("in progress"))
 		})
 	})
 
 	Describe("ListGames", func() {
 		It("returns a summary of the games in progress", func() {
-			id1 := apiServer.CreateNewGame()
-			id2 := apiServer.CreateNewGame()
-			id3 := apiServer.CreateNewGame()
+			id1, _ := apiServer.CreateNewGame()
+			id2, _ := apiServer.CreateNewGame()
+			id3, _ := apiServer.CreateNewGame()
 
 			games := apiServer.ListGames()
 			Expect(games).To(HaveLen(3))
@@ -48,7 +45,7 @@ var _ = Describe("API", func() {
 
 	Describe("GetGame", func() {
 		It("returns the current game state", func() {
-			id := apiServer.CreateNewGame()
+			id, _ := apiServer.CreateNewGame()
 
 			foundGame, err := apiServer.GetGame(id)
 			Expect(err).NotTo(HaveOccurred())
@@ -63,7 +60,7 @@ var _ = Describe("API", func() {
 
 	Describe("MakeGameMove", func() {
 		It("returns the status of the game", func() {
-			id := apiServer.CreateNewGame()
+			id, _ := apiServer.CreateNewGame()
 
 			status, err := apiServer.MakeGameMove(id, "z")
 			Expect(err).NotTo(HaveOccurred())

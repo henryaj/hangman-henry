@@ -7,18 +7,29 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"github.com/henryaj/hangman-henry/game"
 )
 
+type GameWithID struct {
+	ID   string    `json:"id"`
+	Game game.Game `json:"game"`
+}
+
 func (a *APIServer) NewGameHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 
-	newGameID := a.CreateNewGame()
+	id, game := a.CreateNewGame()
 
-	io.WriteString(w, fmt.Sprintf(
-		`{"id": "%s"}`,
-		newGameID,
-	))
+	resp, err := json.Marshal(GameWithID{ID: id, Game: *game})
+	if err != nil {
+		handleError(err, w)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	io.WriteString(w, string(resp))
 }
 
 func (a *APIServer) ListGameHandler(w http.ResponseWriter, r *http.Request) {

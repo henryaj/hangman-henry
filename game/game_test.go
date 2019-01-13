@@ -47,9 +47,9 @@ var _ = Describe("Game", func() {
 		When("there are no attempts remaining", func() {
 			It("returns an error", func() {
 				err := game.Try("q")
-				Expect(err).To(MatchError(fmt.Errorf("game over")))
+				Expect(err).To(MatchError(fmt.Errorf("game over - the word was 'abc'")))
 
-				Expect(game.Try("y")).To(MatchError(fmt.Errorf("game already lost")))
+				Expect(game.Try("y")).To(MatchError(fmt.Errorf("game's over, stop playing")))
 			})
 		})
 	})

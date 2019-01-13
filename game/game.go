@@ -13,12 +13,39 @@ type Game struct {
 	GameState         GameState `json:"game_state"`
 }
 
-type GameState int
+func (g Game) String() string {
+	letters := strings.Split(g.Word, "")
+	for i, char := range letters {
+		if g.hasBeenAttempted(char) {
+			continue
+		}
+
+		letters[i] = "_"
+	}
+
+	return fmt.Sprintf(
+		"game %s\n%s\nattempts remaining: %d\n",
+		g.GameState,
+		strings.Join(letters, " "),
+		g.AttemptsRemaining)
+}
+
+func (g *Game) hasBeenAttempted(char string) bool {
+	for _, letter := range g.LettersAttempted {
+		if char == letter {
+			return true
+		}
+	}
+
+	return false
+}
+
+type GameState string
 
 const (
-	inProgress GameState = iota + 1
-	won
-	lost
+	inProgress = "in progress"
+	won        = "won"
+	lost       = "lost"
 )
 
 // NewGame returns a new game.
@@ -33,8 +60,8 @@ func NewGame(word string, attemptsRemaning int) *Game {
 // Try plays a letter in the current game, returning an error if that
 // letter has already been played.
 func (g *Game) Try(letter string) error {
-	if g.GameState == lost {
-		return fmt.Errorf("game already lost")
+	if g.GameState != inProgress {
+		return fmt.Errorf("game's over, stop playing")
 	}
 
 	for _, char := range g.LettersAttempted {
@@ -51,7 +78,7 @@ func (g *Game) Try(letter string) error {
 
 	if g.AttemptsRemaining == 0 {
 		g.GameState = lost
-		return fmt.Errorf("game over")
+		return fmt.Errorf("game over - the word was '%s'", g.Word)
 	}
 
 	if sliceFullyContainsString(g.LettersAttempted, g.Word) {

@@ -5,12 +5,38 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/henryaj/hangman-henry/game"
 	uuid "github.com/satori/go.uuid"
 )
 
 type GamesMap map[string]*game.Game
+
+func (g GamesMap) String() string {
+	var gamesList []string
+
+	for id, game := range g {
+		var lettersAttempted = "none"
+
+		if len(game.LettersAttempted) > 0 {
+			lettersAttempted = strings.Join(game.LettersAttempted, "")
+		}
+
+		gameString := fmt.Sprintf(
+			"%s | %d | %s",
+			id,
+			game.AttemptsRemaining,
+			lettersAttempted,
+		)
+
+		gamesList = append(gamesList, gameString)
+	}
+
+	return "ALL GAMES\n" +
+		"---------\n" +
+		strings.Join(gamesList, "\n")
+}
 
 type APIServer struct {
 	games  GamesMap
@@ -29,7 +55,7 @@ func NewAPIServer() *APIServer {
 	}
 }
 
-func (a *APIServer) CreateNewGame() string {
+func (a *APIServer) CreateNewGame() (string, *game.Game) {
 	words := []string{"alabaster", "lobster", "loofah"}
 	n := rand.Intn(len(words))
 	word := words[n]
@@ -39,7 +65,7 @@ func (a *APIServer) CreateNewGame() string {
 
 	a.games[id] = g
 
-	return id
+	return id, g
 }
 
 func (a *APIServer) ListGames() map[string]*game.Game {
