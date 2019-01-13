@@ -52,7 +52,7 @@ n - start a new game
 	}
 }
 
-func playGame(serverURI, id string, game game.Game) {
+func playGame(serverURI, id string, game *game.Game) {
 	fmt.Println("")
 	fmt.Println("Hit Ctrl-C to exit the game")
 	fmt.Println(game)

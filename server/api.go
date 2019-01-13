@@ -12,6 +12,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// GamesMap is a hash map of all known games, keyed
+// by game ID.
 type GamesMap map[string]*game.Game
 
 func (g GamesMap) String() string {
@@ -39,17 +41,20 @@ func (g GamesMap) String() string {
 		strings.Join(gamesList, "\n")
 }
 
+// APIServer is a singleton representing the API server.
 type APIServer struct {
 	games  GamesMap
 	lock   sync.RWMutex
 	logger *log.Logger
 }
 
-type GameSummary struct {
+// GameWithID is a wrapper for a Game struct and its unique ID.
+type GameWithID struct {
 	ID   string
 	Game *game.Game
 }
 
+// NewAPIServer initialises and returns an API Server.
 func NewAPIServer() *APIServer {
 	return &APIServer{
 		games:  make(map[string]*game.Game),
@@ -58,6 +63,8 @@ func NewAPIServer() *APIServer {
 	}
 }
 
+// CreateNewGame creates a game with a random word and returns it,
+// along with its unique ID.
 func (a *APIServer) CreateNewGame() (string, *game.Game) {
 	words := []string{"alabaster", "lobster", "loofah"}
 	n := rand.Intn(len(words))
@@ -73,10 +80,12 @@ func (a *APIServer) CreateNewGame() (string, *game.Game) {
 	return id, g
 }
 
+// ListGames lists all ongoing and past games.
 func (a *APIServer) ListGames() map[string]*game.Game {
 	return a.games
 }
 
+// GetGame finds a game by its ID and returns it, or an error if not found.
 func (a *APIServer) GetGame(id string) (*game.Game, error) {
 	a.lock.RLock()
 	game, ok := a.games[id]
@@ -88,20 +97,25 @@ func (a *APIServer) GetGame(id string) (*game.Game, error) {
 	return game, nil
 }
 
-func (a *APIServer) MakeGameMove(id string, letter string) (*GameSummary, error) {
+// MakeGameMove makes a move for the specified game, returning a summary of
+// that game.
+func (a *APIServer) MakeGameMove(id string, letter string) (*GameWithID, error) {
 	game, err := a.GetGame(id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: prevent user from playing more than one letter!
+	if len(letter) != 1 {
+		return nil, fmt.Errorf("invalid play: play a single letter")
+	}
+
 	err = game.Try(letter)
 	if err != nil {
 		return nil, err
 	}
 
-	return &GameSummary{
+	return &GameWithID{
 		ID:   id,
 		Game: game,
 	}, nil
