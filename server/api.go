@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/henryaj/hangman-henry/game"
 	uuid "github.com/satori/go.uuid"
@@ -40,6 +41,7 @@ func (g GamesMap) String() string {
 
 type APIServer struct {
 	games  GamesMap
+	lock   sync.RWMutex
 	logger *log.Logger
 }
 
@@ -51,6 +53,7 @@ type GameSummary struct {
 func NewAPIServer() *APIServer {
 	return &APIServer{
 		games:  make(map[string]*game.Game),
+		lock:   sync.RWMutex{},
 		logger: log.New(os.Stdout, "http: ", log.LstdFlags),
 	}
 }
@@ -63,7 +66,9 @@ func (a *APIServer) CreateNewGame() (string, *game.Game) {
 	g := game.NewGame(word, 10)
 	id := uuid.Must(uuid.NewV4(), nil).String()
 
+	a.lock.Lock()
 	a.games[id] = g
+	a.lock.Unlock()
 
 	return id, g
 }
@@ -73,7 +78,9 @@ func (a *APIServer) ListGames() map[string]*game.Game {
 }
 
 func (a *APIServer) GetGame(id string) (*game.Game, error) {
+	a.lock.RLock()
 	game, ok := a.games[id]
+	a.lock.RUnlock()
 
 	if !ok {
 		return nil, fmt.Errorf("game not found")
